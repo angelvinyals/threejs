@@ -1,19 +1,37 @@
 function init() {
-	
+
+	// listen to the resize events
+    window.addEventListener('resize', onResize, false);
+
+    let camera;
+    let scene;
+    let renderer;
+
+	// initialize stats
 	let stats = initStats();
 	
 
 	console.log("Using Three.js version: " + THREE.REVISION);
-	var scene = new THREE.Scene();
+
+	// create a scene, that will hold all our elements such as objects, cameras and lights.
+	scene = new THREE.Scene();
 	console.log("scene:", scene);
-	var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+	// create a camera, which defines where we're looking at.
+	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 	console.log("camera:", camera);
-	var renderer = new THREE.WebGLRenderer();
+
+	// create a render and set the size
+	renderer = new THREE.WebGLRenderer();
 	console.log("scene, camera and renderer created");
+
 	renderer.setClearColor(new THREE.Color(0x000000));
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.shadowMap.enabled = true
 
+	
+
+	// create the axes
 	var axes = new THREE.AxesHelper(26);
 	scene.add(axes);
 	
@@ -80,6 +98,8 @@ function init() {
     spotLight.castShadow = true;
     scene.add(spotLight);
 
+    // add the output of the renderer to the html element
+    document.getElementById("webgl-output").appendChild(renderer.domElement);
 
     // call the render function
     let step = 0;
@@ -95,14 +115,15 @@ function init() {
     gui.add(controls, 'rotationSpeed', 0, 0.5);
     gui.add(controls, 'bouncingSpeed', 0, 0.5);
 
-
-    // attach them here, since appendChild needs to be called first
-    //var trackballControls = initTrackballControls(camera, renderer);
-    //var clock = new THREE.Clock();
+	// initialize the trackball controls and the clock which is needed
+    var trackballControls = initTrackballControls(camera, renderer);
+    var clock = new THREE.Clock();
+   
 
     render();
 
     function render() {
+
 		// update the stats and the controls
         trackballControls.update(clock.getDelta());
         stats.update();
@@ -126,12 +147,11 @@ function init() {
         renderer.render(scene, camera);
 	}
 
-
-	// add the output of the renderer to the html element
-	document.getElementById("webgl-output")
-		.appendChild(renderer.domElement);
-	var trackballControls = initTrackballControls(camera, renderer);
-    var clock = new THREE.Clock();
+	function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }  
 	
 }
 
